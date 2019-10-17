@@ -8,8 +8,6 @@ function usage {
     echo -e "\tping-discovery       - Run a ping discovery on the network"
     echo -e "\ttcp-udp-w-scripts    - Run a tcp and udp discovery with scripts"
     echo -e "\t100-most-common      - Scan the 100 most common ports. Fast."
-    echo -e "[*] DNS Stuff"
-    echo -e "\tdns-brute            - DNS Bruteforce, find other sub-domains"
     echo -e "[*] FTP Scans"
     echo -e "\tftp-anon             - check if FTP server allows anonymous logins"
     echo -e "\tftp-brute            - uses brute library to perform password guessing"
@@ -17,15 +15,31 @@ function usage {
     echo -e "\tfind-http-hosts      - Find other HTTP hosts"
     echo -e "\thttp-enum            - testing web servers and web applications and directories"
     echo -e "\thttp-title           - find the title of the hosts pages"
+    echo -e "\thttp-default         - tries default accounts for variety of services"
+    echo -e "\thttp-brute           - brute-forces protected directory /printers/"
+    echo -e "\thttp-headers         - web page headers"
     echo -e "\tnikto                - Running http nikto on interesting directories"
     echo -e "\tdirbuster            - Run dirbuster on HTTP"
-    echo -e "\thttp-default         - tries default accounts for variety of services"
     echo -e "[*] Windows SMB Enumeration with nmap and snmp-check (TCP-139/445) "
     echo -e "\tsmb-enum             - Enumerate snmp to show other open ports/running services and applications"
     echo -e "\tsmb-disc             - smb-os-discovery determines OS, Computer name etc. port 445"
     echo -e "\tsmb-brute            - attempt to discover local accounts port 445"
     echo -e "[*] SNMP Enumeration (UDP-161)"
     echo -e "\tsnmp-enum            - Enumerate snmp to show other open ports/running services and applications"
+    echo -e "[*] DNS Stuff"
+    echo -e "\tdns-brute            - DNS Bruteforce, find other sub-domains"
+}
+
+function http-headers {
+    CMD="nmap --script http-headers $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function http-brute {
+    CMD="nmap -p80 --script http-brute --script-args http-brute.path=/printers/ $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
 }
 
 function 100-most-common {
@@ -65,7 +79,7 @@ function ftp-anon {
 }
 
 function dirbuster {
-    CMD="dirbuster"
+    CMD="dirbuster http://$IP"
     echo -e "[*] Launching $CMD use: /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt"
     $CMD
 }
