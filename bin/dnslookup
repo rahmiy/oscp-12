@@ -1,0 +1,97 @@
+#!/bin/bash
+
+HAS_MX=""
+HAS_NS=""
+HAS_ADDR=""
+HAS_IP=""
+HOST="megacorpone.com"
+TYPES=("www" "http" "https" "ftp" "mail" "proxy" "mx" "pop" "firewall" "admin")
+HOST="megacorpone.com"
+TYPE_CHOSEN=""
+
+function lookupMX {
+    HAS_MX=`host -t mx "$CONNECTION" | grep "is handled" | cut -d" " -f5,6,7`
+    if [ "$HAS_MX" ]; then
+        echo -e "[MX] Host ${CONNECTION} has MX:\n$HAS_MX"
+    fi
+}
+
+function lookupIP {
+    HAS_IP=`host "$CONNECTION" | grep "is handled" | cut -d" " -f5,6,7`
+    if [ "$HAS_IP" ]; then
+        echo -e "[IP] Host ${CONNECTION} has MX:\n$HAS_IP"
+    fi
+}
+
+function lookupNS {
+    HAS_NS=`host -t ns "$HOST" | grep "name server" | cut -d" " -f4`
+    if [ "$HAS_NS" ]; then
+        echo -e "[NS] Host ${HOST} has NS:\n$HAS_NS\n"
+    fi
+}
+
+function clearREC {
+    HAS_ADDR=""
+    HAS_MX=""
+    HAS_NS=""
+}
+
+function usage {
+    echo -e "Welcome to $0, dealing with dns related issues everyday!"
+    echo -e "\t-all - run them all, ns, mx, zone-transfer"
+    echo -e "\t-ns - run only Name server lookups"
+    echo -e "\t-mx - run only mail-exchange lookups"
+    echo -e "\t-host - run a host or set to default which his $HOST"
+    echo -e "\t-zone - do a zone transfer request
+    echo -e "\t-h - Help, this!"
+}
+
+while getopts ":all:ns:mx:h:" o; do
+    case "${o}" in
+        all) 
+            TYPE_CHOSEN=""
+            ;;
+        ns)
+            VAL=$OPTARG
+            TYPE_CHOSEN="ns"
+
+            ;;
+        mx)
+            echo -e "[*] Host: $OPTARG"
+            TYPE_CHOSEN="mx"
+            ;;
+        host)
+            HOST=$OPTARG
+            ;;
+        h)
+            usage
+            exit 0
+            ;;
+        *)
+            TYPE_CHOSEN=""
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+function run_main {
+    echo -e "[*] trying... $TYPE_CHOSEN on host ${CONNECTION}"
+    HAS_ADDR=`host "$CONNECTION" | grep "has address" | cut -d" " -f4`
+    lookupMX
+    lookupNS
+    lookupIP
+]
+
+run_main
+clearREC
+
+for pre in "${TYPES[@]}"
+do
+    lookupMX
+    lookupNS
+    lookupIP
+
+    clearREC
+done;
+
+

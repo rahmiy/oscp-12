@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+
+my $type = $ARGV[0];
+my $data = $ARGV[1];
+
+print "Type: $type Data: $data\n";
+
+if ($type eq 'bin2dec') {
+    $data = "0b$data";
+    my $conv = sprintf("%d", eval $data);
+    print "bin2dec for $data is: $conv\n";
+} else {
+    my $conv = sprintf("%b", $data);
+    print "dec2bin for $data is: $conv\n";
+}

