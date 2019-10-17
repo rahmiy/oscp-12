@@ -1,0 +1,147 @@
+#!/bin/bash
+
+OPT=$1
+IP=$2
+
+function usage {
+    echo -e "[*] nmap port scans"
+    echo -e "\tping-discovery       - Run a ping discovery on the network"
+    echo -e "\ttcp-udp-w-scripts    - Run a tcp and udp discovery with scripts"
+    echo -e "\t100-most-common      - Scan the 100 most common ports. Fast."
+    echo -e "[*] DNS Stuff"
+    echo -e "\tdns-brute            - DNS Bruteforce, find other sub-domains"
+    echo -e "[*] FTP Scans"
+    echo -e "\tftp-anon             - check if FTP server allows anonymous logins"
+    echo -e "\tftp-brute            - uses brute library to perform password guessing"
+    echo -e "[*] HTTP Scans"
+    echo -e "\tfind-http-hosts      - Find other HTTP hosts"
+    echo -e "\thttp-enum            - testing web servers and web applications and directories"
+    echo -e "\thttp-title           - find the title of the hosts pages"
+    echo -e "\tnikto                - Running http nikto on interesting directories"
+    echo -e "\tdirbuster            - Run dirbuster on HTTP"
+    echo -e "\thttp-default         - tries default accounts for variety of services"
+    echo -e "[*] Windows SMB Enumeration with nmap and snmp-check (TCP-139/445) "
+    echo -e "\tsmb-enum             - Enumerate snmp to show other open ports/running services and applications"
+    echo -e "\tsmb-disc             - smb-os-discovery determines OS, Computer name etc. port 445"
+    echo -e "\tsmb-brute            - attempt to discover local accounts port 445"
+    echo -e "[*] SNMP Enumeration (UDP-161)"
+    echo -e "\tsnmp-enum            - Enumerate snmp to show other open ports/running services and applications"
+}
+
+function 100-most-common {
+    CMD="nmap -F $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function ping-discovery {
+    CMD="nmap -sP $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function http-default {
+    CMD="nmap -p 80 --script http-default-accounts $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function http-default {
+    CMD="nmap -p 80 --script http-default-accounts $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function ftp-brute {
+    CMD="nmap --script ftp-brute -p 21 $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function ftp-anon {
+    CMD="nmap -sV -sC --script ftp-anon $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function dirbuster {
+    CMD="dirbuster"
+    echo -e "[*] Launching $CMD use: /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt"
+    $CMD
+}
+
+function nikto {
+    # required $2=IP, $3=PORT and $4=DIRECTORy
+    CMD="nikto -h http(s)://$IP:$3/$4"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function smb-enum {
+    CMD="enum4linux -a $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function snmp-enum {
+    CMD="snmp-check -t $IP -c public"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function tcp-udp-w-scripts {
+    CMD="nmap -sS -sV -sC -n -oA ./tcp-udp-w-scripts.nmap $IP"
+    echo -e "[*] Running TCP $CMD"
+    $CMD
+
+    CMD="nmap -sU -sV -n --top-ports 200 $IP"
+    echo -e "[*] Running UDP $CMD"
+    $CMD
+}
+
+function smb-brute {
+    CMD="nmap -sV -p 445 --script smb-brute $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function smb-disc {
+    CMD="nmap -p 445 --script smb-os-discovery $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function http-title {
+    CMD="nmap -sV -p 80 --script http-title $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function http-enum {
+    CMD="nmap --script http-enum $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function dns-brute {
+    CMD="nmap -p 80 --script dns-brute.nse $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+function find-http-hosts {
+    CMD="nmap -p 80 --script hostmap-bfk.nse $IP"
+    echo -e "[*] Running $CMD"
+    $CMD
+}
+
+echo "One: $1 Two: $IP Three: $3"
+
+if [ -z "$OPT" ]; then
+    usage
+    exit 1
+fi
+
+$OPT
+
+
